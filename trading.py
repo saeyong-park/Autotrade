@@ -11,8 +11,8 @@ coinname = ["BTC","ETH","BCH","AAVE","LTC","SOL","BSV","AVAX","AXS","STRK",
 "BTG","ETC","ATOM","NEO","DOT","LINK","REP","NEAR","QTUM","WAVES",
 "FLOW","WEMIX","GAS","SBD","OMG","TON","XTZ","KAVA","SAND","THETA",
 "MANA","AQT","HUNT","ONG","PUNDIX","XRP","IOTA","BAT","ZRX","POWR",
-"GLM","NU","LOOM","META","ORBS","ANKR","TRX","SNT","VET","JST",
-"TT","CRE","MFT","MBL","XEC"]
+"GLM","NU","META","ORBS","ANKR","TRX","SNT","VET","JST","TT",
+"CRE","MFT","MBL","XEC"]
 
 
 def buy_strategy(ticker):
@@ -122,11 +122,11 @@ def get_upper_down_rate(ticker, lastbuyprice):
     return rate
 
 def short_trading(ticker):
-    df = pyupbit.get_ohlcv(ticker, interval="minutes1", count=2)
+    df = pyupbit.get_ohlcv(ticker, interval="minutes3", count=2)
     if df.iloc[-1]['close']-df.iloc[-1]['open'] > 0:
         rate = ((get_current_price(ticker)-df.iloc[-1]['open'])/df.iloc[-1]['open'])*100
         if rate > 2:
-            if df.iloc[-1]['volume'] > df.iloc[0]['volume']*8:
+            if df.iloc[-1]['volume'] > df.iloc[0]['volume']*3:
                 return 1
 
     return 0
@@ -139,7 +139,7 @@ print("autotrade start")
 krw = get_balance("KRW")/3
 lastbuyprice = 0
 while True:
-    for i in range(0,55,1):
+    for i in range(0,54,1):
         
         try:
             krw = get_balance("KRW")/3
@@ -235,18 +235,18 @@ while True:
                     while (get_balance(str(coinname[i]))!=0):
                         print("--------------변동성 돌파 보유중------------------")
                         #현재 가격이 평균구매가격보다 1% 높은 경우 매도
-                        if get_current_price("KRW-"+str(coinname[i])) > ((upbit.get_avg_buy_price("KRW-"+str(coinname[i])))*1.007):
+                        if get_current_price("KRW-"+str(coinname[i])) > ((upbit.get_avg_buy_price("KRW-"+str(coinname[i])))*1.08):
                             btc = get_balance(str(coinname[i]))
                             upbit.sell_market_order("KRW-"+str(coinname[i]), btc)
                             #매도후 15분 정도의 대기를 통해서 한번의 거래만 이루어질 수 있도록 조절
-                            sleep(900)
+                            sleep(1800)
                          
-                        #현재가격이 평균구매가격보다 -1.5%인 경우 매도
-                        if get_current_price("KRW-"+str(coinname[i])) < upbit.get_avg_buy_price("KRW-"+str(coinname[i]))*0.985:
+                        #현재가격이 평균구매가격보다 -1%인 경우 매도
+                        if get_current_price("KRW-"+str(coinname[i])) < upbit.get_avg_buy_price("KRW-"+str(coinname[i]))*0.99:
                             btc = get_balance(str(coinname[i]))
                             upbit.sell_market_order("KRW-"+str(coinname[i]), btc)
                             #매도후 15분 정도의 대기를 통해서 한번의 거래만 이루어질 수 있도록 조절
-                            sleep(900)
+                            sleep(1800)
                
             while (get_balance(str(coinname[i]))!=0):
                 print("--------------240분봉 보유중------------------")
