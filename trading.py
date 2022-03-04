@@ -130,7 +130,7 @@ def short_trading(ticker):
             if rate1 > 3:
                 #현재 봉의 상태가 2%이상 4%이하
                 rate2 = ((get_current_price(ticker)-df.iloc[-1]['open'])/df.iloc[-1]['open'])*100
-                if 4 > rate2 > 0.5:
+                if 4 > rate2:
                     #현재가격이 윗꼬리와 1%이하 차이가 발생하는 종목만을 선택하도록 설정 
                     if df.iloc[-1]['high']< df.iloc[-1]['close']*1.01:
                         return 1
