@@ -22,9 +22,10 @@ def buy_strategy(ticker):
     total = 0
     lastestclose = 0
     for i in range(0,7,1):
-        if df.iloc[i]['close']-df.iloc[i]['open'] > 0:
+        #양봉이면서 윗꼬리가 종가의 2%를 넘어가지 않는 것을 카운트 양보으로 취급함
+        if df.iloc[i]['close']-df.iloc[i]['open'] > 0 and df.iloc[i]['high'] < df.iloc[i]['close']*1.02:
+            
             if df.iloc[i+1]['close']-df.iloc[i+1]['open'] < 0:
-                
                 count= 0
                 gap = 0 
                 total = 0
@@ -122,18 +123,13 @@ def get_upper_down_rate(ticker, lastbuyprice):
     return rate
 
 def short_trading(ticker):
-    df = pyupbit.get_ohlcv(ticker, interval="minutes3", count=3)
+    df = pyupbit.get_ohlcv(ticker, interval="minutes3", count=2)
     if df.iloc[-1]['close']-df.iloc[-1]['open'] > 0:
-        rate1 = ((get_current_price(ticker)-df.iloc[1]['open'])/df.iloc[1]['open'])*100
-        if df.iloc[0]['volume']*3 < df.iloc[1]['volume']:
-        #전봉의 등락률이 3%이상인 종목을 매수조건으로 설정
-            if rate1 > 3:
-                #현재 봉의 상태가 2%이상 4%이하
-                rate2 = ((get_current_price(ticker)-df.iloc[-1]['open'])/df.iloc[-1]['open'])*100
-                if 4 > rate2:
-                    #현재가격이 윗꼬리와 1%이하 차이가 발생하는 종목만을 선택하도록 설정 
-                    if df.iloc[-1]['high']< df.iloc[-1]['close']*1.01:
-                        return 1
+        rate1 = ((get_current_price(ticker)-df.iloc[-1]['open'])/df.iloc[-1]['open'])*100
+        if df.iloc[0]['volume']*1.5 < df.iloc[-1]['volume']:
+        #전봉의 등락률이 2%이상인 종목을 매수조건으로 설정
+            if rate1 > 2:
+                return 1
 
     return 0
 
@@ -240,7 +236,7 @@ while True:
 
                     while (get_balance(str(coinname[i]))!=0):
                         print("--------------변동성 돌파 보유중------------------")
-                        #현재 가격이 평균구매가격보다 2% 높은 경우 매도
+                        #현재 가격이 평균구매가격보다 1% 높은 경우 매도
                         if get_current_price("KRW-"+str(coinname[i])) > ((upbit.get_avg_buy_price("KRW-"+str(coinname[i])))*1.01):
                             btc = get_balance(str(coinname[i]))
                             upbit.sell_market_order("KRW-"+str(coinname[i]), btc)
@@ -264,7 +260,8 @@ while True:
                     print(3)
                     upbit.sell_market_order("KRW-"+str(coinname[i]),krw)          
 
-                if get_current_price("KRW-"+str(coinname[i])) < upbit.get_avg_buy_price("KRW-"+str(coinname[i]))*0.96:
+                
+                if get_current_price("KRW-"+str(coinname[i])) < upbit.get_avg_buy_price("KRW-"+str(coinname[i]))*0.985:
                     now = datetime.datetime.now()
                     if second_start_time < now < second_end_time:
                         if get_balance("KRW") > 5000:
