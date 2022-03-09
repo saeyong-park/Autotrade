@@ -86,6 +86,29 @@ def buy_strategy(ticker):
                    
     return count
 
+def get_ma5(ticker):
+    """5일 이동 평균선 조회"""
+    df = pyupbit.get_ohlcv(ticker, interval="day", count=5)
+    ma5 = df['close'].rolling(5).mean().iloc[-1]
+    return ma5
+
+def get_ma10(ticker):
+    """10일 이동 평균선 조회"""
+    df = pyupbit.get_ohlcv(ticker, interval="day", count=10)
+    ma10 = df['close'].rolling(10).mean().iloc[-1]
+    return ma10
+
+def get_ma15(ticker):
+    """15일 이동 평균선 조회"""
+    df = pyupbit.get_ohlcv(ticker, interval="day", count=15)
+    ma15 = df['close'].rolling(15).mean().iloc[-1]
+    return ma15
+
+def get_ma25(ticker):
+    """25일 이동 평균선 조회"""
+    df = pyupbit.get_ohlcv(ticker, interval="day", count=25)
+    ma25 = df['close'].rolling(25).mean().iloc[-1]
+    return ma25
 
 def get_start_time(ticker):
     """시작 시간 조회"""
@@ -123,14 +146,23 @@ def get_upper_down_rate(ticker, lastbuyprice):
     return rate
 
 def short_trading(ticker):
-    df = pyupbit.get_ohlcv(ticker, interval="minutes3", count=2)
-    if df.iloc[-1]['close']-df.iloc[-1]['open'] > 0:
-        rate1 = ((get_current_price(ticker)-df.iloc[-1]['open'])/df.iloc[-1]['open'])*100
-        if df.iloc[0]['volume']*1.5 < df.iloc[-1]['volume']:
-        #전봉의 등락률이 2%이상인 종목을 매수조건으로 설정
-            if rate1 > 2:
-                return 1
+    df = pyupbit.get_ohlcv(ticker, interval="minute15", count=10)
+    ma_5 = get_ma5(ticker)
+    ma_10 = get_ma10(ticker)
+    ma_15 = get_ma15(ticker)
+    ma_25 = get_ma25(ticker)
+    print(ma_5)
+    print(ma_10)
+    print(ma_15)
+    print(ma_25)
 
+    if get_current_price(ticker) > df.iloc[-3]['close']:
+        if ma_10 *1.1 > ma_5 > ma_10*1.03:
+            if ma_15 *1.1 > ma_10 > ma_15*1.01:
+                if ma_25 *1.1 > ma_15 > ma_25*1.01:
+                    if ma_5 > ma_10 and ma_10 > ma_15  and ma_15 > ma_25 :
+                        return 1
+                
     return 0
 
 
@@ -243,8 +275,8 @@ while True:
                             #매도후 30분의 대기를 통해서 한번의 거래만 이루어질 수 있도록 조절
                             time.sleep(1800)
                          
-                        #현재가격이 평균구매가격보다 -1%인 경우 매도
-                        if get_current_price("KRW-"+str(coinname[i])) < upbit.get_avg_buy_price("KRW-"+str(coinname[i]))*0.99:
+                        #현재가격이 평균구매가격보다 -2%인 경우 매도
+                        if get_current_price("KRW-"+str(coinname[i])) < upbit.get_avg_buy_price("KRW-"+str(coinname[i]))*0.98:
                             btc = get_balance(str(coinname[i]))
                             upbit.sell_market_order("KRW-"+str(coinname[i]), btc)
                             #매도후 30분의 대기를 통해서 한번의 거래만 이루어질 수 있도록 조절
@@ -302,4 +334,3 @@ while True:
         except Exception as e:
             print(e)
             time.sleep(1)
-
