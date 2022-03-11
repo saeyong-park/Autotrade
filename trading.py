@@ -88,31 +88,31 @@ def buy_strategy(ticker):
 
 def get_ma5(ticker):
     """5일 이동 평균선 조회"""
-    df = pyupbit.get_ohlcv(ticker, interval="day", count=5)
+    df = pyupbit.get_ohlcv(ticker, interval="minute15", count=5)
     ma5 = df['close'].rolling(5).mean().iloc[-1]
     return ma5
 
 def get_ma10(ticker):
     """10일 이동 평균선 조회"""
-    df = pyupbit.get_ohlcv(ticker, interval="day", count=10)
+    df = pyupbit.get_ohlcv(ticker, interval="minute15", count=10)
     ma10 = df['close'].rolling(10).mean().iloc[-1]
     return ma10
 
 def get_ma15(ticker):
     """15일 이동 평균선 조회"""
-    df = pyupbit.get_ohlcv(ticker, interval="day", count=15)
+    df = pyupbit.get_ohlcv(ticker, interval="minute15", count=15)
     ma15 = df['close'].rolling(15).mean().iloc[-1]
     return ma15
 
 def get_ma25(ticker):
     """25일 이동 평균선 조회"""
-    df = pyupbit.get_ohlcv(ticker, interval="day", count=25)
+    df = pyupbit.get_ohlcv(ticker, interval="minute15", count=25)
     ma25 = df['close'].rolling(25).mean().iloc[-1]
     return ma25
 
 def get_start_time(ticker):
     """시작 시간 조회"""
-    df = pyupbit.get_ohlcv(ticker, interval="day", count=1)
+    df = pyupbit.get_ohlcv(ticker, interval="minute15", count=1)
     start_time = df.index[0]
     return start_time
 
@@ -156,12 +156,11 @@ def short_trading(ticker):
     print(ma_15)
     print(ma_25)
 
-    if get_current_price(ticker) > df.iloc[-3]['close']:
-        if ma_10 *1.1 > ma_5 > ma_10*1.03:
-            if ma_15 *1.1 > ma_10 > ma_15*1.01:
-                if ma_25 *1.1 > ma_15 > ma_25*1.01:
-                    if ma_5 > ma_10 and ma_10 > ma_15  and ma_15 > ma_25 :
-                        return 1
+    df1 = pyupbit.get_ohlcv(ticker, interval="day",count = 1)
+    rate2 = (get_current_price(ticker)-df1.iloc[-1]['open'])/df1.iloc[-1]['open']
+    if rate2 < 3:
+        if ma_5 > ma_10 and ma_10 > ma_15  and ma_15 > ma_25 :
+            return 1
                 
     return 0
 
@@ -334,3 +333,4 @@ while True:
         except Exception as e:
             print(e)
             time.sleep(1)
+
