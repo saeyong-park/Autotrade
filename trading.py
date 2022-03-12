@@ -178,21 +178,28 @@ def short_trading(ticker):
     ma_5 = get_ma5(ticker)
     ma_10 = get_ma10(ticker)
     ma_15 = get_ma15(ticker)
-    ma_25 = get_ma25(ticker)
-    
+
     delay_ma5 = get_delay_ma5(ticker)
     delay_ma10 = get_delay_ma10(ticker)
     delay_ma15 = get_delay_ma15(ticker)
-    delay_ma25 = get_delay_ma25(ticker)
+    
 
-    if delay_ma5 > delay_ma10 and delay_ma10 > delay_ma15 and delay_ma15 > delay_ma25:
+
+    if delay_ma5 > delay_ma10 and delay_ma10 > delay_ma15:
         print("dfsdfs")
     else:
-        if ma_10 *1.025 > ma_5:
-            if ma_15 *1.025 > ma_10:
-                if ma_25*1.025 > ma_15:
-                    if ma_5 > ma_10 and ma_10 > ma_15 and ma_15 > ma_25:
-                        return 1
+        for i in range(0,9,1):
+            rate = ((df.iloc[i]['high'] - df.iloc[i]['open'])/df.iloc[i]['open'])*100
+            print(rate)
+
+            if rate > 0.5:
+                return 0
+
+        if ma_5 > ma_10 and ma_10 > ma_15:
+            nalza = datetime.datetime.now()
+            sigan = nalza.minute
+            if sigan % 15 == 0:
+                return 1
                 
     return 0
 
@@ -305,7 +312,7 @@ while True:
                     while (get_balance(str(coinname[i]))!=0):
                         print("--------------변동성 돌파 보유중------------------")
                         #현재 가격이 평균구매가격보다 0.7% 높은 경우 매도
-                        if get_current_price("KRW-"+str(coinname[i])) > ((upbit.get_avg_buy_price("KRW-"+str(coinname[i])))*1.07):
+                        if get_current_price("KRW-"+str(coinname[i])) > ((upbit.get_avg_buy_price("KRW-"+str(coinname[i])))*1.005):
                             btc = get_balance(str(coinname[i]))
                             upbit.sell_market_order("KRW-"+str(coinname[i]), btc)
                             #매도후 30분의 대기를 통해서 한번의 거래만 이루어질 수 있도록 조절
@@ -370,3 +377,4 @@ while True:
         except Exception as e:
             print(e)
             time.sleep(1)
+
