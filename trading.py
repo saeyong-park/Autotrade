@@ -88,61 +88,62 @@ def buy_strategy(ticker):
 
 def get_ma5(ticker):
     """5일 이동 평균선 조회"""
-    df = pyupbit.get_ohlcv(ticker, interval="minute15", count=5)
+    df = pyupbit.get_ohlcv(ticker, interval="minute5", count=5)
     ma5 = df['close'].rolling(5).mean().iloc[-1]
     return ma5
 
 def get_ma10(ticker):
     """10일 이동 평균선 조회"""
-    df = pyupbit.get_ohlcv(ticker, interval="minute15", count=10)
+    df = pyupbit.get_ohlcv(ticker, interval="minute5", count=10)
     ma10 = df['close'].rolling(10).mean().iloc[-1]
     return ma10
 
 def get_ma15(ticker):
     """15일 이동 평균선 조회"""
-    df = pyupbit.get_ohlcv(ticker, interval="minute15", count=15)
+    df = pyupbit.get_ohlcv(ticker, interval="minute5", count=15)
     ma15 = df['close'].rolling(15).mean().iloc[-1]
     return ma15
 
 def get_ma25(ticker):
     """25일 이동 평균선 조회"""
-    df = pyupbit.get_ohlcv(ticker, interval="minute15", count=25)
+    df = pyupbit.get_ohlcv(ticker, interval="minute5", count=25)
     ma25 = df['close'].rolling(25).mean().iloc[-1]
     return ma25
 
 def get_delay_ma5(ticker):
     """5일 이동 평균선 조회"""
     nalza1 = datetime.datetime.now() - datetime.timedelta(minutes= 15)
-    df = pyupbit.get_ohlcv(ticker, interval="minute15", count=5, to = str(nalza1))
+    df = pyupbit.get_ohlcv(ticker, interval="minute5", count=5, to = str(nalza1))
     ma5 = df['close'].rolling(5).mean().iloc[-1]
     return ma5
 
 def get_delay_ma10(ticker):
     """10일 이동 평균선 조회"""
     nalza2 = datetime.datetime.now() - datetime.timedelta(minutes= 15)
-    df = pyupbit.get_ohlcv(ticker, interval="minute15", count=10, to = str(nalza2))
+    df = pyupbit.get_ohlcv(ticker, interval="minute5", count=10, to = str(nalza2))
     ma10 = df['close'].rolling(10).mean().iloc[-1]
     return ma10
 
 def get_delay_ma15(ticker):
     """15일 이동 평균선 조회"""
     nalza3 = datetime.datetime.now() - datetime.timedelta(minutes= 15)
-    df = pyupbit.get_ohlcv(ticker, interval="minute15", count=15, to = str(nalza3))
+    df = pyupbit.get_ohlcv(ticker, interval="minute5", count=15, to = str(nalza3))
     ma10 = df['close'].rolling(15).mean().iloc[-1]
     return ma10
 
 def get_delay_ma25(ticker):
     """25일 이동 평균선 조회"""
     nalza3 = datetime.datetime.now() - datetime.timedelta(minutes= 15)
-    df = pyupbit.get_ohlcv(ticker, interval="minute15", count=25, to = str(nalza3))
+    df = pyupbit.get_ohlcv(ticker, interval="minute5", count=25, to = str(nalza3))
     ma25 = df['close'].rolling(25).mean().iloc[-1]
     return ma25
 
 def get_start_time(ticker):
     """시작 시간 조회"""
-    df = pyupbit.get_ohlcv(ticker, interval="minute15", count=1)
+    df = pyupbit.get_ohlcv(ticker, interval="day", count=1)
     start_time = df.index[0]
     return start_time
+
 
 def get_target_price(ticker, k):
     """변동성 돌파 전략으로 매수 목표가 조회"""
@@ -174,31 +175,26 @@ def get_upper_down_rate(ticker, lastbuyprice):
     return rate
 
 def short_trading(ticker):
-    df = pyupbit.get_ohlcv(ticker, interval="minute15", count=10)
+    df = pyupbit.get_ohlcv(ticker, interval="minute5", count=20)
     ma_5 = get_ma5(ticker)
     ma_10 = get_ma10(ticker)
     ma_15 = get_ma15(ticker)
 
-    delay_ma5 = get_delay_ma5(ticker)
-    delay_ma10 = get_delay_ma10(ticker)
-    delay_ma15 = get_delay_ma15(ticker)
-    
-
-
-    if delay_ma5 > delay_ma10 and delay_ma10 > delay_ma15:
-        print("dfsdfs")
-    else:
-        for i in range(0,9,1):
+    if ma_5 > ma_10 and ma_10 > ma_15:
+        for i in range(0,19,1):
             rate = ((df.iloc[i]['high'] - df.iloc[i]['open'])/df.iloc[i]['open'])*100
             print(rate)
-
             if rate > 0.5:
                 return 0
 
-        if ma_5 > ma_10 and ma_10 > ma_15:
+        for j in range(0,19,1):
+            sum += df.iloc[j]['volume']
+            avg = sum/19
+
+        if df.iloc[-1]['volume']> avg:
             nalza = datetime.datetime.now()
             sigan = nalza.minute
-            if sigan % 15 == 0:
+            if sigan % 5 == 0 or sigan % 5 == 1 or sigan % 5 == 2:
                 return 1
                 
     return 0
@@ -319,7 +315,7 @@ while True:
                             time.sleep(1800)
                          
                         #현재가격이 평균구매가격보다 -1%인 경우 매도
-                        if get_current_price("KRW-"+str(coinname[i])) < upbit.get_avg_buy_price("KRW-"+str(coinname[i]))*0.99:
+                        if get_current_price("KRW-"+str(coinname[i])) < upbit.get_avg_buy_price("KRW-"+str(coinname[i]))*0.995:
                             btc = get_balance(str(coinname[i]))
                             upbit.sell_market_order("KRW-"+str(coinname[i]), btc)
                             #매도후 30분의 대기를 통해서 한번의 거래만 이루어질 수 있도록 조절
