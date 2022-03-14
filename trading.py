@@ -7,12 +7,12 @@ access = ""
 secret = ""
 
 
-coinname = ["BCH","AAVE","LTC","SOL","BSV","AVAX","AXS","STRK",
+coinname = ["BCH","AAVE","LTC","SOL","BSV","AVAX","AXS","STRK","XEC","MBL",
 "BTG","ETC","ATOM","NEO","DOT","LINK","REP","NEAR","QTUM","WAVES",
 "FLOW","WEMIX","GAS","SBD","OMG","TON","XTZ","KAVA","SAND","THETA",
-"MANA","AQT","HUNT","ONG","PUNDIX","XRP","IOTA","ZRX","POWR",
+"MANA","AQT","HUNT","ONG","PUNDIX","XRP","IOTA","ZRX","POWR","MFT",
 "GLM","NU","META","ORBS","ANKR","TRX","SNT","VET","JST","TT",
-"CRE","MFT","MBL","XEC"]
+"CRE"]
 
 
 def buy_strategy(ticker):
@@ -179,7 +179,7 @@ def short_trading(ticker):
     ma_5 = get_ma5(ticker)
     ma_10 = get_ma10(ticker)
     ma_15 = get_ma15(ticker)
-
+    sum =0
     if ma_5 > ma_10 and ma_10 > ma_15:
         for i in range(0,19,1):
             rate = ((df.iloc[i]['high'] - df.iloc[i]['open'])/df.iloc[i]['open'])*100
@@ -189,8 +189,8 @@ def short_trading(ticker):
 
         for j in range(0,19,1):
             sum += df.iloc[j]['volume']
-            avg = sum/19
-
+            
+        avg = sum/19
         if df.iloc[-1]['volume']> avg:
             nalza = datetime.datetime.now()
             sigan = nalza.minute
@@ -206,7 +206,7 @@ print("autotrade start")
 krw = get_balance("KRW")/3
 lastbuyprice = 0
 while True:
-    for i in range(0,5,1):
+    for i in range(0,51,1):
         
         try:
             krw = get_balance("KRW")/3
@@ -241,7 +241,7 @@ while True:
             #익일 09시 10분 전 
             seventh_start_time  = stand +datetime.timedelta(minutes=1430)
             #익일 09시 1분 전
-            seventh_end_time = stand +datetime.timedelta(minutes=1429)
+            seventh_end_time = stand +datetime.timedelta(minutes=1439)
 
             
             print(str(coinname[i]))
@@ -255,7 +255,7 @@ while True:
                     if get_balance("KRW") > 5000:
                         upbit.buy_market_order("KRW-"+str(coinname[i]), krw*0.9995)
                         lastbuyprice = get_current_price("KRW-"+str(coinname[i]))
-                        time.sleep(600)
+                   
             #16시 50분 ~ 16시 59분
             elif third_start_time < now < third_end_time:
                 if buy_strategy("KRW-"+str(coinname[i])) > 1:
@@ -263,7 +263,7 @@ while True:
                     if get_balance("KRW") > 5000:
                         upbit.buy_market_order("KRW-"+str(coinname[i]), krw*0.9995)
                         lastbuyprice = get_current_price("KRW-"+str(coinname[i]))
-                        time.sleep(600)
+               
             #20시 50분 ~ 20시 59분
             elif fourth_start_time < now < fourth_end_time:
                 if buy_strategy("KRW-"+str(coinname[i])) > 1:
@@ -271,7 +271,7 @@ while True:
                     if get_balance("KRW") > 5000:
                         upbit.buy_market_order("KRW-"+str(coinname[i]), krw*0.9995)
                         lastbuyprice = get_current_price("KRW-"+str(coinname[i]))
-                        time.sleep(600)
+             
             #익일 00시 50분 ~ 00시 59분
             elif fifth_start_time < now < fifth_end_time:
                 if buy_strategy("KRW-"+str(coinname[i])) > 1:
@@ -279,7 +279,7 @@ while True:
                     if get_balance("KRW") > 5000:
                         upbit.buy_market_order("KRW-"+str(coinname[i]), krw*0.9995)
                         lastbuyprice = get_current_price("KRW-"+str(coinname[i]))
-                        time.sleep(600)
+                 
             #익일 04시 50분 ~ 04시 59분
             elif sixth_start_time < now < sixth_end_time:
                 if buy_strategy("KRW-"+str(coinname[i])) > 1:
@@ -287,7 +287,7 @@ while True:
                     if get_balance("KRW") > 5000:
                         upbit.buy_market_order("KRW-"+str(coinname[i]), krw*0.9995)
                         lastbuyprice = get_current_price("KRW-"+str(coinname[i]))
-                        time.sleep(600)
+                     
             #익일 08시 50분 ~ 08시 59분
             elif seventh_start_time < now < seventh_end_time:
                 if buy_strategy("KRW-"+str(coinname[i])) > 1:
@@ -295,7 +295,7 @@ while True:
                     if get_balance("KRW") > 5000:
                         upbit.buy_market_order("KRW-"+str(coinname[i]), krw*0.9995)
                         lastbuyprice = get_current_price("KRW-"+str(coinname[i]))
-                        time.sleep(600)
+                       
             #이외의 시간
             else:
                     print("eeeeeeeeee")
@@ -311,11 +311,10 @@ while True:
                         if get_current_price("KRW-"+str(coinname[i])) > ((upbit.get_avg_buy_price("KRW-"+str(coinname[i])))*1.005):
                             btc = get_balance(str(coinname[i]))
                             upbit.sell_market_order("KRW-"+str(coinname[i]), btc)
-                            #매도후 30분의 대기를 통해서 한번의 거래만 이루어질 수 있도록 조절
-                            time.sleep(1800)
+                            
                          
                         #현재가격이 평균구매가격보다 -1%인 경우 매도
-                        if get_current_price("KRW-"+str(coinname[i])) < upbit.get_avg_buy_price("KRW-"+str(coinname[i]))*0.995:
+                        if get_current_price("KRW-"+str(coinname[i])) < upbit.get_avg_buy_price("KRW-"+str(coinname[i]))*0.99:
                             btc = get_balance(str(coinname[i]))
                             upbit.sell_market_order("KRW-"+str(coinname[i]), btc)
                             #매도후 30분의 대기를 통해서 한번의 거래만 이루어질 수 있도록 조절
@@ -334,35 +333,42 @@ while True:
                 
                 if get_current_price("KRW-"+str(coinname[i])) < upbit.get_avg_buy_price("KRW-"+str(coinname[i]))*0.985:
                     now = datetime.datetime.now()
+                    #12tl 50분 ~ 12시 59분
                     if second_start_time < now < second_end_time:
                         if get_balance("KRW") > 5000:
                             upbit.buy_market_order("KRW-"+str(coinname[i]), krw*0.9995)
                             lastbuyprice = get_current_price("KRW-"+str(coinname[i]))
+                            time.sleep(600)
                     #16시 50분 ~ 16시 59분
                     elif third_start_time < now < third_end_time:
                         if get_balance("KRW") > 5000:
                             upbit.buy_market_order("KRW-"+str(coinname[i]), krw*0.9995)
                             lastbuyprice = get_current_price("KRW-"+str(coinname[i]))
+                            time.sleep(600)
                     #20시 50분 ~ 20시 59분
                     elif fourth_start_time < now < fourth_end_time:
                         if get_balance("KRW") > 5000:
                             upbit.buy_market_order("KRW-"+str(coinname[i]), krw*0.9995)
                             lastbuyprice = get_current_price("KRW-"+str(coinname[i]))
+                            time.sleep(60)
                     #익일 00시 50분 ~ 00시 59분
                     elif fifth_start_time < now < fifth_end_time:
                         if get_balance("KRW") > 5000:
                             upbit.buy_market_order("KRW-"+str(coinname[i]), krw*0.9995)
                             lastbuyprice = get_current_price("KRW-"+str(coinname[i]))
+                            time.sleep(60)
                     #익일 04시 50분 ~ 04시 59분
                     elif sixth_start_time < now < sixth_end_time:
                         if get_balance("KRW") > 5000:
                             upbit.buy_market_order("KRW-"+str(coinname[i]), krw*0.9995)
                             lastbuyprice = get_current_price("KRW-"+str(coinname[i]))
+                            time.sleep(60)
                     #익일 08시 50분 ~ 08시 59분
                     elif seventh_start_time < now < seventh_end_time:
                         if get_balance("KRW") > 5000:
                             upbit.buy_market_order("KRW-"+str(coinname[i]), krw*0.9995)
                             lastbuyprice = get_current_price("KRW-"+str(coinname[i]))
+                            time.sleep(60)
                     #이외의 시간
                     else:
                         print("1")
