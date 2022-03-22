@@ -134,6 +134,68 @@ def find_ma2_change_flow():
                     print("금일 5이평선이 20이평선보다 위에 존재함")
                     attentioncoin.append(str(coinname[i]))
 
+def buying_time():
+    #하루의 기준인 오전 9시를 가져옴
+    stand = get_start_time("KRW-BTC")
+    #변동성 돌파 전략을 사용할 시간을 정함
+    #오전 9시로부터 5분(시작 시간)
+    start_time = stand
+    #오전 9시로부터 20분(끝나는 시간)
+    end_time = stand + datetime.timedelta(minutes=30)
+    #13시 10분 전
+    second_start_time  = stand +datetime.timedelta(minutes=230)
+    #13시 1분 전
+    second_end_time = stand +datetime.timedelta(minutes=239)
+    #17시 10분 전
+    third_start_time  = stand +datetime.timedelta(minutes=470)
+    #17시 1분 전
+    third_end_time = stand +datetime.timedelta(minutes=479)
+    #21시 10분 전
+    fourth_start_time  = stand +datetime.timedelta(minutes=710)
+    #21시 1분 전
+    fourth_end_time = stand +datetime.timedelta(minutes=719)
+    #익일 01시 10분 전
+    fifth_start_time  = stand +datetime.timedelta(minutes=950)
+    #익일 01시 1분 전
+    fifth_end_time = stand +datetime.timedelta(minutes=959)
+    #익일 05시 10분 전 
+    sixth_start_time  = stand +datetime.timedelta(minutes=1190)
+    #익일 05시 1분 전
+    sixth_end_time = stand +datetime.timedelta(minutes=1199)
+    #익일 09시 10분 전 
+    seventh_start_time  = stand +datetime.timedelta(minutes=1430)
+    #익일 09시 4분 전
+    seventh_end_time = stand +datetime.timedelta(minutes=1436)
+    #익일 09시 2분 전 
+    eighth_start_time  = stand +datetime.timedelta(minutes=1438)
+    #익일 09시
+    eighth_end_time = stand +datetime.timedelta(minutes=1440)
+    now = datetime.datetime.now()
+ 
+    #12시 50분 ~ 12시 59분
+    if second_start_time < now < second_end_time:
+        return 1
+    #16시 50분 ~ 16시 59분
+    elif third_start_time < now < third_end_time:
+        return 1
+    #20시 50분 ~ 20시 59분
+    elif fourth_start_time < now < fourth_end_time:
+        return 1                        
+    #익일 00시 50분 ~ 00시 59분
+    elif fifth_start_time < now < fifth_end_time:
+        return 1
+    #익일 04시 50분 ~ 04시 59분
+    elif sixth_start_time < now < sixth_end_time:                     
+        return 1
+    #익일 08시 50분 ~ 08시 59분
+    elif seventh_start_time < now < seventh_end_time:
+        return 1
+    #Bought_coin 리스트 초기화 시간
+    elif eighth_start_time < now < eighth_end_time:
+        return 2
+    #ma5_over_ma20 시간
+    else:
+        return 3
 
 
 
