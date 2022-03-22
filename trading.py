@@ -11,9 +11,9 @@ def get_upper_down_rate(ticker, lastbuyprice):
 
     return rate
 
-def find_bestk(ticker):
-  for k in range(0.1, 1.0, 0.1):
-    df = pyupbit.get_ohlcv(ticker, count=7)
+def get_ror(ticker,k):
+    df = pyupbit.get_ohlcv(ticker, interval="day", count=7)
+    time.sleep(0.1)
     df['range'] = (df['high'] - df['low']) * k
     df['target'] = df['open'] + df['range'].shift(1)
 
@@ -22,7 +22,12 @@ def find_bestk(ticker):
                          1)
 
     ror = df['ror'].cumprod()[-2]
-
+    return ror
+    
+def find_bestk(ticker):
+  for k in np.arange(0.1,1.0,0.1):
+    ror = get_ror(ticker, k)
+    
     if k == 0.1:
       bestk = k
       max = ror
@@ -69,6 +74,20 @@ def get_ma2(ticker):
     ma2 = df['close'].rolling(2).mean().iloc[-1]
     return ma2
 
+def get_delay_ma2(ticker):
+    """하루 전 2일 이동 평균선 조회"""
+    timegap5 = datetime.datetime.now() - datetime.timedelta(days=1)
+    df = pyupbit.get_ohlcv(ticker, interval="day", count=2, to = str(timegap5))
+    d_ma2 = df['close'].rolling(2).mean().iloc[-1]
+    return d_ma2
+
+def get_delay_delay_ma2(ticker):
+    """이틀 전 2일 이동 평균선 조회"""
+    timegap5 = datetime.datetime.now() - datetime.timedelta(days=2)
+    df = pyupbit.get_ohlcv(ticker, interval="day", count=2, to = str(timegap5))
+    d_d_ma2 = df['close'].rolling(2).mean().iloc[-1]
+    return d_d_ma2
+
 #일봉의 5일 이동 평균선 조회
 def get_ma5(ticker):
     """5일 이동 평균선 조회"""
@@ -81,54 +100,25 @@ def get_ma5(ticker):
 def get_ma20(ticker):
     """20일 이동 평균선 조회"""
     df = pyupbit.get_ohlcv(ticker, interval="day", count=20)
-    ma10 = df['close'].rolling(20).mean().iloc[-1]
-    return ma10
-def get_delay_ma3(ticker):
-    """3일 이동 평균선 조회"""
-    timegap5 = datetime.datetime.now() - datetime.timedelta(days=1)
-    df = pyupbit.get_ohlcv(ticker, interval="day", count=3, to = str(timegap5))
-    ma3 = df['close'].rolling(3).mean().iloc[-1]
-    return ma3
-
-#하루전 일봉의 5일 이동 평균선 조회
-def get_delay_ma5(ticker):
-    """5일 이동 평균선 조회"""
-    timegap5 = datetime.datetime.now() - datetime.timedelta(days=1)
-    df = pyupbit.get_ohlcv(ticker, interval="day", count=5, to = str(timegap5))
-    ma5 = df['close'].rolling(5).mean().iloc[-1]
-    return ma5
-
-
-#하루전 일봉의 20일 이동 평균선 조회
-def get_delay_ma20(ticker):
-    """20일 이동 평균선 조회"""
-    timegap20 = datetime.datetime.now() - datetime.timedelta(days=1)
-    df = pyupbit.get_ohlcv(ticker, interval="day", count=20, to = str(timegap20))
     ma20 = df['close'].rolling(20).mean().iloc[-1]
     return ma20
-    
-def get_delay_delay_ma3(ticker):
-    """5일 이동 평균선 조회"""
-    timegap5 = datetime.datetime.now() - datetime.timedelta(days=2)
-    df = pyupbit.get_ohlcv(ticker, interval="day", count=3, to = str(timegap5))
-    ma3 = df['close'].rolling(3).mean().iloc[-1]
-    return ma3
+
 
 def find_ma2_change_flow():
     for i in range(0,104,1):
         print(str(coinname[i]))
-        #이틀 전의 3일 이동평균선을 찾음
+        #이틀 전의 2일 이동평균선을 찾음
         d_d_ma2 = get_delay_delay_ma2("KRW-"+str(coinname[i]))
-        #하루 전의 3일 이동평균선을 찾음
+        #하루 전의 2일 이동평균선을 찾음
         d_ma2 = get_delay_ma2("KRW-"+str(coinname[i]))
         #오늘의 3일 이동평균선을 찾음
         ma2 = get_ma2("KRW-"+str(coinname[i]))
         
         ma5 = get_ma5("KRW-"+str(coinname[i]))
-        ma20= get_ma5("KRW-"+str(coinname[i]))
+        ma20= get_ma20("KRW-"+str(coinname[i]))
 
         time.sleep(0.3)
-        if ma5 > ma20:
+        if ma5 > ma20*1.05:
             if d_d_ma2 > d_ma2:
                 if ma2 > d_ma2:
                     print("금일 5이평선이 20이평선보다 위에 존재함")
@@ -137,66 +127,19 @@ def find_ma2_change_flow():
 def buying_time():
     #하루의 기준인 오전 9시를 가져옴
     stand = get_start_time("KRW-BTC")
-    #변동성 돌파 전략을 사용할 시간을 정함
-    #오전 9시로부터 5분(시작 시간)
+    #계산을 위한 시간 설정
     start_time = stand
-    #오전 9시로부터 20분(끝나는 시간)
-    end_time = stand + datetime.timedelta(minutes=30)
-    #13시 10분 전
-    second_start_time  = stand +datetime.timedelta(minutes=230)
-    #13시 1분 전
-    second_end_time = stand +datetime.timedelta(minutes=239)
-    #17시 10분 전
-    third_start_time  = stand +datetime.timedelta(minutes=470)
-    #17시 1분 전
-    third_end_time = stand +datetime.timedelta(minutes=479)
-    #21시 10분 전
-    fourth_start_time  = stand +datetime.timedelta(minutes=710)
-    #21시 1분 전
-    fourth_end_time = stand +datetime.timedelta(minutes=719)
-    #익일 01시 10분 전
-    fifth_start_time  = stand +datetime.timedelta(minutes=950)
-    #익일 01시 1분 전
-    fifth_end_time = stand +datetime.timedelta(minutes=959)
-    #익일 05시 10분 전 
-    sixth_start_time  = stand +datetime.timedelta(minutes=1190)
-    #익일 05시 1분 전
-    sixth_end_time = stand +datetime.timedelta(minutes=1199)
     #익일 09시 10분 전 
-    seventh_start_time  = stand +datetime.timedelta(minutes=1430)
-    #익일 09시 4분 전
-    seventh_end_time = stand +datetime.timedelta(minutes=1436)
-    #익일 09시 2분 전 
-    eighth_start_time  = stand +datetime.timedelta(minutes=1438)
+    reset_start_time  = stand +datetime.timedelta(minutes=1430)
     #익일 09시
-    eighth_end_time = stand +datetime.timedelta(minutes=1440)
+    reset_end_time = stand +datetime.timedelta(minutes=1440)
     now = datetime.datetime.now()
- 
-    #12시 50분 ~ 12시 59분
-    if second_start_time < now < second_end_time:
-        return 1
-    #16시 50분 ~ 16시 59분
-    elif third_start_time < now < third_end_time:
-        return 1
-    #20시 50분 ~ 20시 59분
-    elif fourth_start_time < now < fourth_end_time:
-        return 1                        
-    #익일 00시 50분 ~ 00시 59분
-    elif fifth_start_time < now < fifth_end_time:
-        return 1
-    #익일 04시 50분 ~ 04시 59분
-    elif sixth_start_time < now < sixth_end_time:                     
-        return 1
     #익일 08시 50분 ~ 08시 59분
-    elif seventh_start_time < now < seventh_end_time:
+    if reset_start_time < now < reset_end_time:
         return 1
-    #Bought_coin 리스트 초기화 시간
-    elif eighth_start_time < now < eighth_end_time:
-        return 2
-    #ma5_over_ma20 시간
+    #초기화 이외의 시간
     else:
-        return 3
-
+        return 2
 
 
 
@@ -217,82 +160,49 @@ coinname =["DOGE","NEAR","WEMIX","JST","SAND","XRP","SBD","SNT","SXP","STRK",
       "AERGO","GRS","PUNDIX","CRE","REP","GLM","LOOM","ONG","FCT2","ARK",
       "IOST","AHT","GAS","QKC"]
 
-def find_ma5_over_ma20():
-    for i in range(0,104,1):
-        print(str(coinname[i]))
-        #금일의 5일 이동평균선을 구함
-        ma_5 =  get_ma5("KRW-"+str(coinname[i]))
-        #금일의 20일 이동평균선을 구함
-        ma_20 = get_ma20("KRW-"+str(coinname[i]))
-        #전일의 5일 이동평균선을 구함
-        d_ma_5 = get_delay_ma5("KRW-"+str(coinname[i]))
-        #전일의 20일 이동편균선을 구함
-        d_ma_20 = get_delay_ma20("KRW-"+str(coinname[i]))
-        time.sleep(0.3)
-        
-        if d_ma_5 < d_ma_20:
-            if ma_5 >= ma_20:
-                print("금일 5이평선이 20이평선보다 위에 존재함")
-                attentioncoin.append(str(coinname[i]))
-        else:
-            print("e")
-
-
 attentioncoin=[]
-coinwallet=[]
 bought_coin=[]
-
 
 upbit = pyupbit.Upbit(access, secret)
 print("autotrade start")
 krw = get_balance("KRW")/3
 lastbuyprice = 0
 
-while True: 
-    try:
-
-        standard = buying_time()
-
-        if standard == 2:
-            bought_coin=[]
-            krw = get_balance("KRW")/3
 
 
-        elif standard == 3:
+standard = buying_time()
 
-            find_ma5_over_ma20()
-            gettable_coin = list(set(attentioncoin) - set(bought_coin))
+if standard == 1:
+    bought_coin=[]
+    krw = get_balance("KRW")/3
 
-            for i in gettable_coin:
-                bestk = find_bestk(i)
-                target_price = get_target_price("KRW-"+str(i), bestk)
-                current_price = get_current_price("KRW-"+str(i))
-                if current_price > target_price:
-                    print("구매가능")
-                    if get_balance("KRW") > 5000:
-                        upbit.buy_market_order("KRW-"+str(i), krw*0.9995)
-                        bought_coin.append("KRW-"+str(i))
-                        time.sleep(1)
-                        
-            
-                    while (get_balance(str(i))!=0):
-                        print("--------------변동성 돌파 보유중------------------")
-                        #현재 가격이 평균구매가격보다 3% 높은 경우 매도
-                        ma2 = get_ma("KRW-"+str(i))
-                        if get_current_price("KRW-"+str(i)) > ((upbit.get_avg_buy_price("KRW-"+str(i)))*1.03):
-                            btc = get_balance(str(coinname[i]))
-                            upbit.sell_market_order("KRW-"+str(i), btc)
-                
-                        elif ma2 < get_current_price("KRW-"+str(i)):
-                            btc = get_balance(str(i))
-                            upbit.sell_market_order("KRW-"+str(i), btc)
+
+elif standard == 2:
+
+    find_ma2_change_flow()
+    gettable_coin = list(set(attentioncoin) - set(bought_coin))
+
+
+    print("m5>m20*1.05 and d_d_ma2 > d_ma2 and d_ma2 < ma2 조건 만족")
+    print(gettable_coin)
+    for i in gettable_coin:
+        bestk = find_bestk("KRW-"+str(i))
+
+        target_price = get_target_price("KRW-"+str(i), bestk)
+        current_price = get_current_price("KRW-"+str(i))
+
+        #현재가격이 타킷가격보다 1%이상 높으면 매수 금지하는 조건 추가할 것.
+        if current_price > target_price:
+            orderbook = orderbook = pyupbit.get_orderbook("KRW-"+str(i))
+            #ask== 매도
+            total_ask_size = orderbook['total_ask_size']
+            #bid == 매수
+            total_bid_size = orderbook['total_bid_size']
+            if total_ask_size > total_bid_size*1.2 and total_ask_size < total_bid_size*2:
+                bought_coin.append(str(i))
 
 
 
-        else:
-            print("rest time")
+print("최종 후보군")
+print(bought_coin)
     
-
-    except Exception as e:
-        print(e)
-        time.sleep(1)
