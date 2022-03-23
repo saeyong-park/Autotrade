@@ -119,7 +119,7 @@ def find_ma2_change_flow():
         ma20= get_ma20("KRW-"+str(coinname[i]))
 
         time.sleep(0.3)
-        if ma5 > ma20*1.05:
+        if ma5 > ma20*1.02:
             if d_d_ma2 > d_ma2:
                 if ma2 > d_ma2:
                     print("금일 5이평선이 20이평선보다 위에 존재함")
