@@ -119,7 +119,7 @@ def find_ma2_change_flow():
         ma20= get_ma20("KRW-"+str(coinname[i]))
 
         time.sleep(0.3)
-        if ma5 > ma20*1.02:
+        if ma5 > ma20*1.05:
             if d_d_ma2 > d_ma2:
                 if ma2 > d_ma2:
                     print("금일 5이평선이 20이평선보다 위에 존재함")
@@ -150,6 +150,7 @@ def find_high_value_coin():
     for i in range(0,104,1):
         df = pyupbit.get_ohlcv("KRW-"+str(coinname[i]), interval="day", count = 1)
         e[str(coinname[i])]= df.iloc[-1]['value']
+        time.sleep(0.3)
     
     e1= sorted(e.items(), key=operator.itemgetter(1), reverse=True)
     for k in range(0,15,1):
@@ -218,10 +219,11 @@ while True:
                 total_ask_size = orderbook['total_ask_size']
                 #bid == 매수
                 total_bid_size = orderbook['total_bid_size']
-                if total_ask_size > total_bid_size*1.2 and total_ask_size < total_bid_size:
-                    if get_balance("KRW") > 5000:
-                        upbit.buy_market_order("KRW-"+str(i), krw*0.9995)
-                        bought_coin.append(str(i))
+                if current_price < target_price:
+                    if total_ask_size > total_bid_size*1.2 and total_ask_size < total_bid_size:
+                        if get_balance("KRW") > 5000:
+                            upbit.buy_market_order("KRW-"+str(i), krw*0.9995)
+                            bought_coin.append(str(i))
                    
                         
                 while (get_balance(str(i))!=0):
