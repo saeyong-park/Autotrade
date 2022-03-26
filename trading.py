@@ -13,7 +13,7 @@ def get_upper_down_rate(ticker, lastbuyprice):
     return rate
 
 def get_ror(ticker,k):
-    df = pyupbit.get_ohlcv(ticker, interval="minute30", count=7)
+    df = pyupbit.get_ohlcv(ticker, interval="minute60", count=7)
     time.sleep(0.1)
     df['range'] = (df['high'] - df['low']) * k
     df['target'] = df['open'] + df['range'].shift(1)
@@ -40,7 +40,7 @@ def find_bestk(ticker):
 
 def get_target_price(ticker, k):
     """변동성 돌파 전략으로 매수 목표가 조회"""
-    df = pyupbit.get_ohlcv(ticker, interval="minute240", count=2)
+    df = pyupbit.get_ohlcv(ticker, interval="minute60", count=2)
     target_price = df.iloc[0]['close'] + (df.iloc[0]['high'] - df.iloc[0]['low']) * k
     return target_price
 
@@ -71,21 +71,23 @@ def get_current_price(ticker):
 
 def get_ma2(ticker):
     """2일 이동 평균선 조회"""
-    df = pyupbit.get_ohlcv(ticker, interval="minute240", count=2)
+    df = pyupbit.get_ohlcv(ticker, interval="minute60", count=2)
     ma2 = df['close'].rolling(2).mean().iloc[-1]
     return ma2
 
+#캔들 봉 체크 할때 datetime.timedelta hours 교체 필수
 def get_delay_ma2(ticker):
     """하루 전 2일 이동 평균선 조회"""
-    timegap5 = datetime.datetime.now() - datetime.timedelta(hours=4)
-    df = pyupbit.get_ohlcv(ticker, interval="minute240", count=2, to = str(timegap5))
+    timegap5 = datetime.datetime.now() - datetime.timedelta(hours=1)
+    df = pyupbit.get_ohlcv(ticker, interval="minute60", count=2, to = str(timegap5))
     d_ma2 = df['close'].rolling(2).mean().iloc[-1]
     return d_ma2
 
+#캔들 봉 체크 할때 datetime.timedelta hours 교체 필수
 def get_delay_delay_ma2(ticker):
     """이틀 전 2일 이동 평균선 조회"""
-    timegap5 = datetime.datetime.now() - datetime.timedelta(hours=8)
-    df = pyupbit.get_ohlcv(ticker, interval="minute240", count=2, to = str(timegap5))
+    timegap5 = datetime.datetime.now() - datetime.timedelta(hours=2)
+    df = pyupbit.get_ohlcv(ticker, interval="minute60", count=2, to = str(timegap5))
     d_d_ma2 = df['close'].rolling(2).mean().iloc[-1]
     return d_d_ma2
 
@@ -153,7 +155,7 @@ def find_high_value_coin():
         time.sleep(0.3)
     
     e1= sorted(e.items(), key=operator.itemgetter(1), reverse=True)
-    for k in range(0,15,1):
+    for k in range(0,20,1):
         high_value_coin.append(str(e1[k][0]))
 
 
@@ -204,7 +206,11 @@ while True:
             gettable_coin = list(set(attentioncoin) - set(bought_coin))
             final_gettable_coin=list(set(gettable_coin) & set(high_value_coin))
 
-
+            print("gettable coin")
+            print(gettable_coin)
+            print("final gettable coin")
+            print(final_gettable_coin)
+            
             print("변동성을 돌파한 코인")
             for i in final_gettable_coin:
                 bestk = find_bestk("KRW-"+str(i))
@@ -245,6 +251,7 @@ while True:
     except Exception as e:
         print(e)
         time.sleep(1)
+
 
 
 
