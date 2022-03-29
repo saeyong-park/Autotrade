@@ -191,7 +191,7 @@ high_value_coin=[]
 
 upbit = pyupbit.Upbit(access, secret)
 print("autotrade start")
-krw = get_balance("KRW")/3
+krw = get_balance("KRW")
 lastbuyprice = 0
 
 
@@ -202,7 +202,7 @@ while True:
 
         if standard == 1:
             bought_coin=[]
-            krw = get_balance("KRW")/3
+            krw = get_balance("KRW")
 
 
         elif standard == 2:
@@ -245,11 +245,10 @@ while True:
                     print("--------------변동성 돌파 보유중------------------")
                     #4시간 봉을 통해서 ma2의 추세가 꺽이게 되면 바로 매도
 
-                    ma_2 = get_ma2("KRW-"+str(i))
-                    ma_3 = get_ma3("KRW-"+str(i))
-                    if ma_2 < ma_3:
-                        btc = get_balance(str(i))
-                        upbit.sell_market_order("KRW-"+str(i), btc)
+                    if get_current_price("KRW-"+str(coinname[i])) > ((upbit.get_avg_buy_price("KRW-"+str(coinname[i])))*1.02):
+                        print(0)
+                        btc = get_balance(str(coinname[i]))
+                        upbit.sell_market_order("KRW-"+str(coinname[i]), btc)
                         
                         
         else:
@@ -259,6 +258,3 @@ while True:
     except Exception as e:
         print(e)
         time.sleep(1)
-
-
-
